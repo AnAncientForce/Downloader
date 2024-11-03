@@ -19,6 +19,7 @@ SAVE_DIR = os.path.join(current_directory, 'Videos')
 class Downloader:
     def __init__(self, idm=False, silent=False):
         self.idm = idm
+        self.silent = silent
 
     def create_directory(self, directory):
         if not os.path.exists(directory):
