@@ -1,3 +1,4 @@
 @echo off
 git pull
-start wt powershell -NoExit -Command "cd '%~dp0'; .venv\Scripts\Activate.ps1; python main.py"
+call "%~dp0.venv\Scripts\activate"
+python "%~dp0main.py"
