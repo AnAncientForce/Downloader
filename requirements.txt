@@ -1,0 +1,6 @@
+colorama
+tk
+requests
+pygetwindow
+pyautogui
+pyperclip
