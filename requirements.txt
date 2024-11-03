@@ -4,3 +4,4 @@ requests
 pygetwindow
 pyautogui
 pyperclip
+rich

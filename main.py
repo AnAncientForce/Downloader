@@ -1,18 +1,23 @@
+from tkinter import filedialog
+from colorama import *
+from rich.console import Console
+
 import os
 import sys
 import signal
-from tkinter import filedialog
-from colorama import *
 import requests
 import subprocess
 import time
 import pyautogui
 import pygetwindow
 import pyperclip
+
 current_directory = os.path.dirname(os.path.realpath(__file__))
+console = Console()
+SAVE_DIR = os.path.join(current_directory, 'Videos')
 
 class Downloader:
-    def __init__(self, idm=False):
+    def __init__(self, idm=False, silent=False):
         self.idm = idm
 
     def create_directory(self, directory):
@@ -22,7 +27,7 @@ class Downloader:
 
     def choose_download_type(self):
 
-        self.create_directory(os.path.join(current_directory, 'Videos'))
+        self.create_directory(SAVE_DIR)
 
         x = input(f'(1: .m3u8, 2: .mp4) Please type {Fore.RED}1{Style.RESET_ALL} or {Fore.RED}2{Style.RESET_ALL} and press enter. > ')
         if x == '1':
@@ -46,21 +51,33 @@ class Downloader:
             print(f'{Fore.RED}Cancel Operation{Style.RESET_ALL}')
             return
 
-        print(f'> {file_path}')
+        print(f'{Fore.GREEN}>{Style.RESET_ALL}{file_path}')
 
         if '.m3u8' in file_path:
             print(f'{Fore.GREEN}.m3u8{Style.RESET_ALL}')
+
+            URL = None
 
             with open(file_path, "r") as f:
                 for line in f:
                     line = line.strip()
                     if line.startswith("http"):
                         print(f'Found {line}')
+                        URL = line
+                        break
            
-                        x = input('What should the file be called? > ')
-                        self.download(line, optional_filename=x)
-                        subprocess.run(f'ffmpeg -i "{line}" -c copy {x}.mp4')
-                        self.on_success()
+            x = input('What should the file be called? > ')
+
+            save_location = os.path.join(SAVE_DIR, x) + '.mp4'
+
+            if os.path.exists(f'{save_location}'):
+                print(f'{Fore.RED}File already at location{Style.RESET_ALL}')
+                return
+
+            with console.status("[bold green]Preparing...") as status:
+                print(f'{Fore.GREEN}Saving to {save_location}{Style.RESET_ALL}')
+                subprocess.run(f'ffmpeg -i "{URL}" -c copy "{save_location}', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                self.on_success()
 
         
         
@@ -147,7 +164,8 @@ class Downloader:
     
     def on_success(self):
         print(f'{Fore.GREEN}Check your "Videos" folder in the same directory as this script to access your videos!{Style.RESET_ALL}')
-        play_audio(os.path.join('sfx', 'bank_se03#20.wav'))
+        if not self.silent:
+            play_audio(os.path.join('sfx', 'bank_se03#20.wav'))
 
 
 def play_audio(sound_path) -> None:
@@ -156,13 +174,17 @@ def play_audio(sound_path) -> None:
 
 def main() -> None:
     idm = False
+    silent = False
 
     for arg in sys.argv[1:]:
         if '--idm' in arg:
             print(f'{Fore.GREEN}idm{Style.RESET_ALL}')
             idm = True
+        if '-s' in arg:
+            print(f'{Fore.GREEN}silent{Style.RESET_ALL}')
+            silent = True
            
-    downloader = Downloader(idm=idm)
+    downloader = Downloader(idm=idm, silent=silent)
     downloader.choose_download_type()
 
 if __name__ == '__main__':
