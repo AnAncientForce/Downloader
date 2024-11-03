@@ -70,7 +70,7 @@ class Downloader:
 
         url = input(f'Please specify the {Fore.RED}EXACT{Style.RESET_ALL} URL to the .mp4 > ')
 
-        self.download(url, verify=True)
+        self.download(url, verify=False)
         
         self.on_success()
     
